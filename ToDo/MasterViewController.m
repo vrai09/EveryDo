@@ -8,10 +8,13 @@
 
 #import "MasterViewController.h"
 #import "DetailViewController.h"
+#import "Todo.h"
+#import "ToDoTableViewCell.h"
 
-@interface MasterViewController ()
+@interface MasterViewController () <UITableViewDataSource, UITableViewDelegate>
 
-@property NSMutableArray *objects;
+@property NSMutableArray *toDos;
+
 @end
 
 @implementation MasterViewController
@@ -21,12 +24,24 @@
     // Do any additional setup after loading the view, typically from a nib.
     self.navigationItem.leftBarButtonItem = self.editButtonItem;
 
-    UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertNewObject:)];
-    self.navigationItem.rightBarButtonItem = addButton;
+    //UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertNewObject:)];
+    //self.navigationItem.rightBarButtonItem = addButton;
+    
+    Todo *toDo1 = [[Todo alloc]initWithTitle:@"Go shopping" description:@"We need more milk" priority:1 completion:NO];
+    Todo *toDo2 = [[Todo alloc]initWithTitle:@"Wash the dog" description:@"He is dirty" priority:2 completion:NO];
+    Todo *toDo3 = [[Todo alloc]initWithTitle:@"Clean the house" description:@"The house is dirty" priority:3 completion:YES];
+    Todo *toDo4 = [[Todo alloc]initWithTitle:@"Go to the gym" description:@"You are fat" priority:4 completion:YES];
+    
+    self.toDos = [[NSMutableArray alloc]initWithObjects:toDo1, toDo2, toDo3, toDo4, nil];
+    
 }
 
 
 - (void)viewWillAppear:(BOOL)animated {
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [self performSegueWithIdentifier:@"showDetail" sender:self];
 }
 
 
@@ -36,14 +51,14 @@
 }
 
 
-- (void)insertNewObject:(id)sender {
-    if (!self.objects) {
-        self.objects = [[NSMutableArray alloc] init];
+/*- (void)insertNewObject:(id)sender {
+    if (!self.toDos) {
+        self.toDos = [[NSMutableArray alloc] init];
     }
-    [self.objects insertObject:[NSDate date] atIndex:0];
+    [self.toDos insertObject:[NSDate date] atIndex:0];
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
     [self.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
-}
+}*/
 
 
 #pragma mark - Segues
@@ -51,9 +66,9 @@
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     if ([[segue identifier] isEqualToString:@"showDetail"]) {
         NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
-        NSDate *object = self.objects[indexPath.row];
+        Todo *toDo = self.toDos[indexPath.row];
         DetailViewController *controller = (DetailViewController *)[segue destinationViewController];
-        [controller setDetailItem:object];
+        [controller setDetailItem:toDo.toDoDescription];
     }
 }
 
@@ -66,31 +81,40 @@
 
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return self.objects.count;
+    return self.toDos.count;
 }
 
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
 
-    NSDate *object = self.objects[indexPath.row];
-    cell.textLabel.text = [object description];
+    ToDoTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ToDoCell" forIndexPath:indexPath];
+    
+    Todo *todoObject = self.toDos[indexPath.row];
+
+    cell.titleLabel.text = todoObject.title;
+    cell.priorityLabel.text = [NSString stringWithFormat:@"%d",todoObject.priority];
+    cell.isCompleted = todoObject.isCompleted;
+    if(cell.isCompleted == YES) {
+        [cell strikethroughString];
+    }
+    
+    
     return cell;
 }
 
-
+/*
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
     // Return NO if you do not want the specified item to be editable.
     return YES;
-}
+} */
 
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        [self.objects removeObjectAtIndex:indexPath.row];
+        [self.toDos removeObjectAtIndex:indexPath.row];
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    } else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
+    /*} else if (editingStyle == UITableViewCellEditingStyleInsert) {
+        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view. */
     }
 }
 
