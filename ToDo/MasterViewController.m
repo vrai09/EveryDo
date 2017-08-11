@@ -21,11 +21,11 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
+    
     self.navigationItem.leftBarButtonItem = self.editButtonItem;
-
-    //UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertNewObject:)];
-    //self.navigationItem.rightBarButtonItem = addButton;
+    
+    UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(didSelectAdd)];
+    self.navigationItem.rightBarButtonItem = addButton;
     
     Todo *toDo1 = [[Todo alloc]initWithTitle:@"Go shopping" description:@"We need more milk" priority:1 completion:NO];
     Todo *toDo2 = [[Todo alloc]initWithTitle:@"Wash the dog" description:@"He is dirty" priority:2 completion:NO];
@@ -36,40 +36,29 @@
     
 }
 
-
-- (void)viewWillAppear:(BOOL)animated {
-}
-
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    [self performSegueWithIdentifier:@"showDetail" sender:self];
-}
-
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
-
-/*- (void)insertNewObject:(id)sender {
-    if (!self.toDos) {
-        self.toDos = [[NSMutableArray alloc] init];
-    }
-    [self.toDos insertObject:[NSDate date] atIndex:0];
-    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
-    [self.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
-}*/
-
-
 #pragma mark - Segues
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    
     if ([[segue identifier] isEqualToString:@"showDetail"]) {
+        
         NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
         Todo *toDo = self.toDos[indexPath.row];
         DetailViewController *controller = (DetailViewController *)[segue destinationViewController];
         [controller setDetailItem:toDo.toDoDescription];
+        
+    }else if([segue.identifier isEqualToString:@"AddItem"]) {
+        
+        AddItemViewController *addItemVC = (AddItemViewController*)[segue destinationViewController];
+        addItemVC.delegate = self;
     }
+    
+}
+
+- (void)didSelectAdd {
+    
+    [self performSegueWithIdentifier:@"AddItem" sender:self];
+    
 }
 
 
@@ -91,32 +80,37 @@
     
     Todo *todoObject = self.toDos[indexPath.row];
 
-    cell.titleLabel.text = todoObject.title;
-    cell.priorityLabel.text = [NSString stringWithFormat:@"%d",todoObject.priority];
+    cell.title = todoObject.title;
+    cell.priority = todoObject.priority;
     cell.isCompleted = todoObject.isCompleted;
-    if(cell.isCompleted == YES) {
-        [cell strikethroughString];
-    }
+    [cell setUpCell];
     
     
     return cell;
 }
 
-/*
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the specified item to be editable.
-    return YES;
-} */
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [self performSegueWithIdentifier:@"showDetail" sender:self];
+}
+
 
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         [self.toDos removeObjectAtIndex:indexPath.row];
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    /*} else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view. */
     }
 }
 
+#pragma mark - Delegate
+
+- (void)newTodo:(Todo *)toDo {
+    
+    [self.toDos insertObject:toDo atIndex:0];
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+    [self.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+    [self.tableView reloadData];
+    
+}
 
 @end

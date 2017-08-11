@@ -10,20 +10,18 @@
 
 @implementation ToDoTableViewCell
 
-- (void)awakeFromNib {
-    [super awakeFromNib];
-    
-    
-}
-
-- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
-    [super setSelected:selected animated:animated];
-
-    // Configure the view for the selected state
-}
-
 - (IBAction)doneButton:(UIButton *)sender {
     [self strikethroughString];
+}
+
+- (void)setUpCell {
+    
+    self.titleLabel.text = self.title;
+    self.priorityLabel.text = [NSString stringWithFormat:@"%d", self.priority];
+    if(self.isCompleted == YES) {
+        [self strikethroughString];
+    }
+    
 }
 
 

@@ -12,9 +12,10 @@
 
 @property (weak, nonatomic) IBOutlet UILabel *titleLabel;
 @property (weak, nonatomic) IBOutlet UILabel *priorityLabel;
-//@property (weak, nonatomic) UIImageView *imageview;
+@property NSString *title;
+@property int priority;
 @property BOOL isCompleted;
 
-- (void)strikethroughString;
+- (void)setUpCell;
 
 @end
